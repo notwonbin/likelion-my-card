@@ -80,3 +80,4 @@ docs/                       분석 문서와 검증 이미지
 - **별색 지정**: 인쇄소가 팬톤 별색 PDF를 요구하면 `src/print/generatePdf.ts`에서 레이어별 색 정의만 바꾸면 된다(현재는 원본 그대로 CMYK).
 - **구성원 정보 자동 입력 / Google Sheets**: `CardData` 형태로 받아 `setData`에 주입.
 - **완료 화면 다음 단계**: `Completion.tsx`의 `NEXT_ACTIONS`.
+# likelion-my-card

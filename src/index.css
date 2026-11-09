@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+
+/* ── 명함 서체 (원본 .ai 임베드 서체 기준) ───────────────────────── */
+/* SUITE Heavy — 한글 (SIL OFL) */
+@font-face {
+  font-family: 'LL SUITE';
+  src: url('./assets/fonts/SUITE-Heavy.woff2') format('woff2');
+  font-weight: 800;
+  font-display: block;
+}
+/* Pretendard — 웹 UI 본문 (SIL OFL) */
+@font-face {
+  font-family: 'LL Pretendard';
+  src: url('pretendard/dist/web/static/woff2/Pretendard-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LL Pretendard';
+  src: url('pretendard/dist/web/static/woff2/Pretendard-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'LL Pretendard';
+  src: url('pretendard/dist/web/static/woff2/Pretendard-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+/* 이메일 '@'는 서체가 아니라 원본 글리프 외곽선(typeset.ts AT_GLYPH)으로 그린다 */
+/* Gotham Bold — 상용 서체. 라이선스 문제로 번들하지 않고, 설치된 경우에만 사용 */
+@font-face {
+  font-family: 'LL Gotham';
+  src: local('Gotham Bold'), local('Gotham-Bold'), local('Gotham Bold Regular');
+  font-weight: 700;
+  font-display: block;
+}
+/* Gotham 미설치 시 화면 확인용 대체 서체 (원본 서체 아님 — UI에서 안내) */
+@font-face {
+  font-family: 'LL Gotham Fallback';
+  src: url('@fontsource/montserrat/files/montserrat-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-display: block;
+}
+
+@theme {
+  --font-sans: 'LL Pretendard', system-ui, -apple-system, sans-serif;
+  /* 원본 파일 컬러 */
+  --color-ink: #231f20;
+  --color-brand: #f37025;
+  --color-brand-soft: #fef1ea;
+  /* UI 중립색 */
+  --color-paper: #f4f4f5;
+  --color-fill: #f2f2f4;
+  --color-line: #e3e3e6;
+  --color-mute: #76767c;
+  --color-faint: #a9a9ae;
+  --color-danger: #e5341d;
+}
+
+html { -webkit-font-smoothing: antialiased; }
+body { @apply bg-paper text-ink font-sans; }

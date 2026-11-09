@@ -1,0 +1,7 @@
+node_modules
+dist
+.DS_Store
+
+# 상용 서체(라이선스) — 저장소에 올리지 않음
+public/fonts/*.otf
+public/fonts/*.ttf

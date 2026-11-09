@@ -82,7 +82,7 @@ export function InformationForm({ sub, onSub, data, errors, overflow, limitHit, 
         e.preventDefault()
         next()
       }}
-      className="flex h-full flex-col max-lg:flex-1"
+      className="h-full"
     >
       <StepCard
         className={STEP_CARD_HEIGHT}

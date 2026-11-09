@@ -1,7 +1,10 @@
 import { useId, type ButtonHTMLAttributes, type ReactNode } from 'react'
 
-/** 모든 단계의 왼쪽 카드 높이 (데스크톱) — 오른쪽 명함 카드도 같은 높이로 맞춰진다 */
-export const STEP_CARD_HEIGHT = 'lg:h-[530px]'
+/**
+ * 모든 단계 카드 높이 — 단계가 바뀌어도 카드 크기가 변하지 않는다.
+ * 데스크톱 530px (오른쪽 명함 카드도 같은 높이), 모바일 540px (화면이 낮으면 머리글·여백을 뺀 높이까지)
+ */
+export const STEP_CARD_HEIGHT = 'h-[min(540px,calc(100dvh-104px))] lg:h-[530px]'
 
 /** 단계 카드: 상단 서비스명 + 진행 알약, 큰 질문 제목, 본문, 하단 고정 버튼 영역 */
 export function StepCard({
@@ -29,7 +32,7 @@ export function StepCard({
   showLabel?: boolean
 }) {
   return (
-    <section className={`flex flex-col rounded-[20px] bg-white p-6 max-lg:flex-1 sm:p-8 ${className}`}>
+    <section className={`flex flex-col rounded-[20px] bg-white p-6 sm:p-8 ${className}`}>
       <div className="flex min-h-[26px] items-center justify-between gap-2">
         {showLabel ? <span className="text-[13px] font-semibold text-mute">멋쟁이사자처럼 명함 만들기</span> : <span />}
         <div className="flex items-center gap-2">

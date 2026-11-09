@@ -37,7 +37,7 @@ export function IntroCover({ onStart }: { onStart?: () => void }) {
       onClick={() => {
         if (onStart && !window.matchMedia('(min-width: 1024px)').matches) onStart()
       }}
-      className={`relative flex h-[460px] flex-col overflow-hidden max-lg:h-auto max-lg:flex-1 max-lg:cursor-pointer rounded-[20px] bg-[#231f20] p-6 text-white sm:p-8 ${STEP_CARD_HEIGHT}`}
+      className={`relative flex flex-col overflow-hidden max-lg:cursor-pointer rounded-[20px] bg-[#231f20] p-6 text-white sm:p-8 ${STEP_CARD_HEIGHT}`}
     >
       {/* 배경: 위(문구)는 원본 명함의 검정 #231F20, 아래(사자)로 갈수록 더 깊은 검정 —
           영상은 lighten 으로 합성되므로 사자의 눈·코(원본 순수 검정)가 배경색으로 들뜨지 않게 한다.

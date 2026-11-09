@@ -113,9 +113,9 @@ export default function App() {
     <div className="flex min-h-dvh flex-col">
       <Header step={step} />
       {/* 단계 카드는 화면 세로 가운데 */}
-      <div className="flex flex-1 flex-col pb-4 lg:justify-center lg:pb-16">
+      <div className="flex flex-1 flex-col justify-center pb-6 lg:pb-16">
         {/* 모든 단계가 같은 틀: 왼쪽 카드(입력·확인·완료) + 오른쪽 카드(명함) — 크기·위치가 바뀌지 않는다 */}
-        <main className="mx-auto grid w-full max-w-[1120px] grid-cols-[minmax(0,1fr)] gap-4 px-4 pt-2 max-lg:flex-1 max-lg:grid-rows-[minmax(0,1fr)] sm:px-6 lg:grid-cols-[440px_minmax(0,1fr)] lg:gap-5 lg:pt-0">
+        <main className="mx-auto grid w-full max-w-[1120px] grid-cols-[minmax(0,1fr)] gap-4 px-4 pt-2 max-lg:max-w-[480px] sm:px-6 lg:grid-cols-[440px_minmax(0,1fr)] lg:gap-5 lg:pt-0">
           {/* 모바일: 카드 하나만 (시작 화면은 이유 선택, 이후는 입력·확인·완료). 명함 미리보기는 화면 밖에서 넘침 계산만 */}
           <div className={intro ? (coverDone ? 'max-lg:hidden' : 'flex flex-col') : 'flex flex-col'}>
             {intro && <IntroCover onStart={() => setCoverDone(true)} />}

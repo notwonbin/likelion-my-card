@@ -9,7 +9,8 @@
  *   - 개인 정보·주소: k 레이어에 살아 있는 텍스트 (Gotham Bold / SUITE Heavy, K98, 원본 자간)
  *     '@'는 원본 글리프 외곽선, 주소 구분 기호는 원본 마름모
  * 그래픽 데이터는 스크립트 안에 들어 있어 따로 받을 파일이 없다.
- * 위치(x, baseline)는 웹에서 같은 서체 파일로 계산한 값(인쇄용 PDF와 동일)을 사용한다.
+ * 위치(x, baseline)는 웹 계산값(인쇄용 PDF와 동일)을 쓰되, Gotham에 따라 달라지는
+ * 이메일의 '@'·도메인 위치만은 일러스트레이터 안에서 아이디 글자 폭을 직접 재서 정한다.
  */
 import frontOrange from '../../print-templates/layers/front_orange.pdf?url'
 import frontK from '../../print-templates/layers/front_k.pdf?url'
@@ -48,8 +49,8 @@ const lit = (v: unknown) => JSON.stringify(v).replace(/[\u007f-￿]/g, (c) => '\
 const r3 = (n: number) => Math.round(n * 1000) / 1000
 
 export async function generateIllustratorScript(data: CardData) {
-  const fonts = await loadCardFonts()
-  if (!fonts.gotham) throw new Error('영문 서체(Gotham) 파일이 있어야 일러용 파일을 만들 수 있어요.')
+  // 영문 폭은 일러스트레이터가 설치된 Gotham으로 직접 잰다 → 웹에는 Gotham이 없어도 된다
+  const fonts = await loadCardFonts({ askLocal: false })
   const items = computeLayout(data, fonts.kit).map((it) =>
     it.kind === 'text'
       ? { ...it, x: r3(it.x), top: r3(it.top), runs: it.runs.map((r) => ({ ...r, tracking: Math.round((r.tracking / it.size) * 1000) })) }
@@ -69,7 +70,7 @@ export async function generateIllustratorScript(data: CardData) {
       boards: ['정보 면', '그래픽 면'],
       fonts: { latin: FONTS.latin.postscript, hangul: FONTS.hangul.postscript },
       k: COLORS.textK98.cmyk,
-      at: { upm: AT_GLYPH.unitsPerEm, contours },
+      at: { upm: AT_GLYPH.unitsPerEm, contours, advance: AT_GLYPH.advance / AT_GLYPH.unitsPerEm },
       items,
     }),
   ).replace('__ART__', () => lit(art))
@@ -165,8 +166,23 @@ const TEMPLATE = `#target illustrator
   ink.cyan = C.k[0]; ink.magenta = C.k[1]; ink.yellow = C.k[2]; ink.black = C.k[3];
   function paint(item) { item.filled = true; item.stroked = false; item.fillColor = ink; }
 
+  // advance width of a text frame, measured in Illustrator: outline(text + 'H') minus outline('H')
+  function advanceOf(tf) {
+    var probe = tf.duplicate(); probe.contents = tf.contents + 'H';
+    var last = probe.textRange.characters[probe.contents.length - 1].characterAttributes;
+    last.textFont = F.latin; last.tracking = 0;
+    var ref = tf.duplicate(); ref.contents = 'H';
+    ref.textRange.characterAttributes.textFont = F.latin; ref.textRange.characterAttributes.tracking = 0;
+    var gA = probe.createOutline(), gB = ref.createOutline();
+    var w = gA.geometricBounds[2] - gB.geometricBounds[2];
+    gA.remove(); gB.remove();
+    return w;
+  }
+  var emailX = null, emailW = 0, atX = null;
   for (i = 0; i < C.items.length; i++) {
     var it = C.items[i];
+    if (it.kind === 'text' && it.role === 'emailDomain' && atX !== null) it.x = atX + C.at.advance * it.size + it.runs[0].tracking / 1000 * it.size;
+    if (it.kind === 'at' && emailX !== null) { it.x = emailX + emailW; atX = it.x; }
     if (it.kind === 'text') {
       var s = '';
       for (j = 0; j < it.runs.length; j++) s += it.runs[j].text;
@@ -185,6 +201,7 @@ const TEMPLATE = `#target illustrator
           ca.tracking = r.tracking;
         }
       }
+      if (it.role === 'emailId') { emailX = it.x; emailW = advanceOf(tf); }
     } else if (it.kind === 'at') {
       var k = it.size / C.at.upm;
       var cp = K.compoundPathItems.add();

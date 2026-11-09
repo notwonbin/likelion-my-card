@@ -21,7 +21,7 @@ export function Completion({ data, onEdit, onRestart, className }: Props) {
         const { generatePrintPdf, downloadPdf } = await import('../print/generatePdf')
         const r = await generatePrintPdf(data)
         downloadPdf(r)
-        if (!r.printReady) setNote('영문 서체(Gotham) 파일이 없어 검수용 PDF로 받았어요.')
+        if (!r.printReady) setNote('Gotham 서체를 찾지 못해 검수용으로 받았어요. Gotham이 설치된 PC의 크롬에서 글꼴 접근을 허용하면 인쇄용으로 받을 수 있어요.')
       } else {
         const [{ generateIllustratorScript }, { downloadFile }] = await Promise.all([import('../print/illustratorScript'), import('../print/generatePdf')])
         const r = await generateIllustratorScript(data)

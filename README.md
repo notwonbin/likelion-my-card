@@ -28,7 +28,7 @@ Gotham은 상용 서체라 번들하지 않는다. **PC에 Gotham Bold가 설치
 | 3 | 실크 후가공 판 — `print-templates/back-silk.pdf` (원본 `실크` 레이어만, 표시색 M100 그대로) |
 
 - 모든 쪽 96×56mm, TrimBox 90×50mm·BleedBox 원본 그대로. 색은 원본 정의(CMYK + 레이어별 판) 유지, 임의 별색 변환 없음.
-- **Gotham Bold 필요**: `public/fonts/Gotham-Bold.otf`(또는 `.ttf`)에 회사 라이선스 파일을 넣으면 그 서체로 만든다. 없으면 대체 서체로 만들고 파일명·문서 제목에 `검수용`을 붙인다 — 인쇄에 쓰지 말 것. 서체에 없는 글자가 있으면 PDF를 만들지 않고 알려준다.
+- **Gotham Bold 필요**: ① Chrome·Edge에서 버튼을 누를 때 '글꼴 접근'을 허용하면 이 PC에 설치된 Gotham을 읽어 쓴다(서체 파일을 사이트에 올리지 않아도 됨). ② 또는 `public/fonts/Gotham-Bold.otf`(로컬 개발용, 저장소 제외)에 넣어 둔다. 없으면 대체 서체로 만들고 파일명·문서 제목에 `검수용`을 붙인다 — 인쇄에 쓰지 말 것. 서체에 없는 글자가 있으면 PDF를 만들지 않고 알려준다.
 - `dist-single`(파일 더블클릭)로 열면 브라우저 보안상 `fonts/` 파일을 읽지 못해 항상 검수용이 된다. 인쇄용은 `npm run dev` 또는 웹 서버에 올린 `dist/`에서 받는다.
 
 ## 일러스트레이터 파일
@@ -41,7 +41,7 @@ Gotham은 상용 서체라 번들하지 않는다. **PC에 Gotham Bold가 설치
 - 그래픽은 원본에서 레이어별로 나눈 벡터(`print-templates/layers/*.pdf`, 스크립트 안에 포함)를 해당 레이어에 넣음
 - 개인정보·주소는 `k` 레이어의 살아 있는 텍스트(Gotham-Bold / SUITE-Heavy, K98, 원본 자간). '@'는 원본 글리프 외곽선, 주소 구분 기호는 마름모 도형
 - 실행하는 맥에 Gotham-Bold, SUITE-Heavy 서체가 설치돼 있어야 함 (없으면 알림 후 중단)
-- 위치는 인쇄용 PDF와 같은 계산(`src/print/layout.ts`)을 사용
+- 위치는 인쇄용 PDF와 같은 계산(`src/print/layout.ts`)을 사용. Gotham 폭에 따라 달라지는 이메일 '@'·도메인 위치만 일러스트레이터 안에서 직접 재서 정하므로, 웹에 Gotham이 없어도 만들 수 있다
 
 ## 구조
 
@@ -80,4 +80,3 @@ docs/                       분석 문서와 검증 이미지
 - **별색 지정**: 인쇄소가 팬톤 별색 PDF를 요구하면 `src/print/generatePdf.ts`에서 레이어별 색 정의만 바꾸면 된다(현재는 원본 그대로 CMYK).
 - **구성원 정보 자동 입력 / Google Sheets**: `CardData` 형태로 받아 `setData`에 주입.
 - **완료 화면 다음 단계**: `Completion.tsx`의 `NEXT_ACTIONS`.
-# likelion-my-card

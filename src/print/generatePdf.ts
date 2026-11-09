@@ -58,9 +58,27 @@ export async function mustFetch(url: string) {
   return r.arrayBuffer()
 }
 
+/**
+ * 이 컴퓨터에 설치된 Gotham Bold 읽기 (Chrome·Edge의 로컬 글꼴 접근, 사용자 허용 필요)
+ * 서체 파일을 사이트에 올리지 않고도 서체를 가진 사람의 PC에서 인쇄용 PDF를 만들 수 있다.
+ */
+async function localGotham(): Promise<ArrayBuffer | null> {
+  const q = (window as unknown as { queryLocalFonts?: (o?: { postscriptNames?: string[] }) => Promise<{ postscriptName: string; blob(): Promise<Blob> }[]> }).queryLocalFonts
+  if (!q) return null
+  try {
+    const fonts = await q({ postscriptNames: ['Gotham-Bold'] })
+    const f = fonts.find((x) => x.postscriptName === 'Gotham-Bold')
+    return f ? await (await f.blob()).arrayBuffer() : null
+  } catch {
+    return null // 사용자가 거절했거나 지원하지 않음
+  }
+}
+
 /** 명함 서체 (영문 Gotham 또는 대체, 한글 SUITE) — PDF·일러 스크립트 공용 */
-export async function loadCardFonts() {
+export async function loadCardFonts({ askLocal = true } = {}) {
   let gotham: ArrayBuffer | null = null
+  // 1) 이 컴퓨터에 설치된 Gotham (버튼을 누른 직후에 물어야 해서 가장 먼저)  2) 사이트의 fonts/ 폴더
+  if (askLocal) gotham = await localGotham()
   for (const c of GOTHAM_CANDIDATES) if (!gotham) gotham = await fetchFont(import.meta.env.BASE_URL + c)
   const bytes: Record<FontKey, ArrayBuffer> = { latin: gotham ?? (await mustFetch(fallbackUrl)), hangul: await mustFetch(suiteUrl) }
   const kit = {
@@ -128,7 +146,7 @@ export function cardFileName(data: CardData, ext: string, suffix = '') {
 }
 
 export async function generatePrintPdf(data: CardData): Promise<PrintPdfResult> {
-  const [frontBytes, backBytes, silkBytes, fonts] = await Promise.all([mustFetch(frontUrl), mustFetch(backUrl), mustFetch(silkUrl), loadCardFonts()])
+  const [frontBytes, backBytes, silkBytes, fonts] = await Promise.all([loadCardFonts(), mustFetch(frontUrl), mustFetch(backUrl), mustFetch(silkUrl)]).then(([f, a, b, c]) => [a, b, c, f] as const)
   const items = computeLayout(data, fonts.kit) // 서체에 없는 글자가 있으면 여기서 중단
 
   const doc = await PDFDocument.load(frontBytes, { updateMetadata: false })

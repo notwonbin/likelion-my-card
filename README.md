@@ -41,6 +41,7 @@ Gotham은 상용 서체라 번들하지 않는다. **PC에 Gotham Bold가 설치
 - 그래픽은 원본에서 레이어별로 나눈 벡터(`print-templates/layers/*.pdf`, 스크립트 안에 포함)를 해당 레이어에 넣음
 - 개인정보·주소는 `k` 레이어의 살아 있는 텍스트(Gotham-Bold / SUITE-Heavy, K98, 원본 자간). '@'는 원본 글리프 외곽선, 주소 구분 기호는 마름모 도형
 - 실행하는 맥에 Gotham-Bold, SUITE-Heavy 서체가 설치돼 있어야 함 (없으면 알림 후 중단)
+- `spec` 레이어: 원본 제작 사양 메모를 정보 면 위(아트보드 밖)에 흰 바탕 + Pretendard 아웃라인으로 넣음. 문구는 `src/card/spec.ts`의 `PRINT_SPEC`, 바꾸면 `python3 scripts/outline_spec.py`로 외곽선(`src/print/specOutline.json`)을 다시 만든다
 - 위치는 인쇄용 PDF와 같은 계산(`src/print/layout.ts`)을 사용. Gotham 폭에 따라 달라지는 이메일 '@'·도메인 위치만 일러스트레이터 안에서 직접 재서 정하므로, 웹에 Gotham이 없어도 만들 수 있다
 
 ## 구조

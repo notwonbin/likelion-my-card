@@ -6,7 +6,7 @@
  *   - 아트보드 2개: 1 정보 면, 2 그래픽 면 (재단 90×50mm, 도련 3mm)
  *   - 레이어 (위→아래): spec · 실크 · orange_021c · k · orange_021c · yellow_127c  (원본과 같음)
  *   - 그래픽: 원본 PDF에서 레이어별로 분리한 벡터를 각 레이어에 포함 (CMYK 값 그대로)
- *   - spec 레이어: 원본의 제작 사양 메모(지류·후가공·도수)를 아트보드 밖(그래픽 면 아래)에 텍스트로
+ *   - spec 레이어: 원본의 제작 사양 메모(지류·후가공·도수) — 정보 면 위, 흰 바탕 + Pretendard 아웃라인 (인쇄 영역 밖)
  *   - 개인 정보·주소: k 레이어에 살아 있는 텍스트 (Gotham Bold / SUITE Heavy, K98, 원본 자간)
  *     '@'는 원본 글리프 외곽선, 주소 구분 기호는 원본 마름모
  * 그래픽 데이터는 스크립트 안에 들어 있어 따로 받을 파일이 없다.
@@ -20,11 +20,12 @@ import backOrangeLow from '../../print-templates/layers/back_orange_low.pdf?url'
 import backK from '../../print-templates/layers/back_k.pdf?url'
 import backOrangeTop from '../../print-templates/layers/back_orange_top.pdf?url'
 import backSilk from '../../print-templates/layers/back_silk.pdf?url'
-import { ARTBOARD, COLORS, FONTS, PRINT_SPEC } from '../card/spec'
+import { ARTBOARD, COLORS, FONTS } from '../card/spec'
 import { AT_GLYPH } from '../card/typeset'
 import type { CardData } from '../card/types'
 import { cardFileName, loadCardFonts, mustFetch } from './generatePdf'
 import { atContours, computeLayout } from './layout'
+import specOutline from './specOutline.json'
 
 /** 레이어 이름 — 원본 순서(아래 → 위). 같은 이름의 orange_021c 두 개도 원본 그대로 */
 const LAYERS = ['yellow_127c', 'orange_021c', 'k', 'orange_021c', '실크', 'spec'] as const
@@ -76,7 +77,7 @@ export async function generateIllustratorScript(data: CardData) {
       k: COLORS.textK98.cmyk,
       at: { upm: AT_GLYPH.unitsPerEm, contours, advance: AT_GLYPH.advance / AT_GLYPH.unitsPerEm },
       items,
-      spec: [PRINT_SPEC.title, ''].concat(PRINT_SPEC.sections.flatMap((sec) => [sec.label, ...sec.lines, ''])).slice(0, -1),
+      spec: specOutline, // Pretendard 외곽선 (scripts/outline_spec.py로 생성)
     }),
   ).replace('__ART__', () => lit(art))
   return { script, fileName: fileName.replace(/\.ai$/, '.jsx') }
@@ -171,6 +172,37 @@ const TEMPLATE = `#target illustrator
   ink.cyan = C.k[0]; ink.magenta = C.k[1]; ink.yellow = C.k[2]; ink.black = C.k[3];
   function paint(item) { item.filled = true; item.stroked = false; item.fillColor = ink; }
 
+  // draw outline contours as one compound path. map(gx, gy) -> [docX, docY]
+  // point format: [x, y] or curve [x, y, c1x, c1y, c2x, c2y] (c1, c2 belong to the segment ending here)
+  function drawContours(container, contours, map, name, color) {
+    var cp = container.compoundPathItems.add(), j, m;
+    cp.name = name;
+    for (j = 0; j < contours.length; j++) {
+      var segs = contours[j], pts = [];
+      for (m = 0; m < segs.length; m++) {
+        var g = segs[m];
+        pts.push({ a: map(g[0], g[1]), l: null, r: null, c1: g.length > 2 ? map(g[2], g[3]) : null, c2: g.length > 2 ? map(g[4], g[5]) : null });
+      }
+      // merge closing point
+      var first = pts[0], last = pts[pts.length - 1];
+      if (pts.length > 1 && Math.abs(first.a[0] - last.a[0]) < 0.001 && Math.abs(first.a[1] - last.a[1]) < 0.001) {
+        first.c1 = last.c1; first.c2 = last.c2; pts.pop();
+      }
+      // handles: this.left = c2, prev.right = c1
+      for (m = 0; m < pts.length; m++) {
+        if (pts[m].c1) { var prev = pts[(m - 1 + pts.length) % pts.length]; prev.r = pts[m].c1; pts[m].l = pts[m].c2; }
+      }
+      var path = cp.pathItems.add();
+      for (m = 0; m < pts.length; m++) {
+        var pp = path.pathPoints.add();
+        pp.anchor = pts[m].a; pp.leftDirection = pts[m].l || pts[m].a; pp.rightDirection = pts[m].r || pts[m].a; pp.pointType = PointType.CORNER;
+      }
+      path.closed = true;
+    }
+    for (j = 0; j < cp.pathItems.length; j++) { cp.pathItems[j].filled = true; cp.pathItems[j].stroked = false; cp.pathItems[j].fillColor = color; }
+    return cp;
+  }
+
   // advance width of a text frame, measured in Illustrator: outline(text + 'H') minus outline('H')
   function advanceOf(tf) {
     var probe = tf.duplicate(); probe.contents = tf.contents + 'H';
@@ -208,40 +240,10 @@ const TEMPLATE = `#target illustrator
       }
       if (it.role === 'emailId') { emailX = it.x; emailW = advanceOf(tf); }
     } else if (it.kind === 'at') {
-      var k = it.size / C.at.upm;
-      var cp = K.compoundPathItems.add();
-      cp.name = '@';
-      for (j = 0; j < C.at.contours.length; j++) {
-        var segs = C.at.contours[j], pts = [], m;
-        for (m = 0; m < segs.length; m++) {
-          var g = segs[m];
-          pts.push({ a: [X(0, it.x) + g[0] * k, Y(0, it.top) + g[1] * k], l: null, r: null,
-            c1: g.length > 2 ? [X(0, it.x) + g[2] * k, Y(0, it.top) + g[3] * k] : null,
-            c2: g.length > 2 ? [X(0, it.x) + g[4] * k, Y(0, it.top) + g[5] * k] : null });
-        }
-        // merge closing point
-        var first = pts[0], last = pts[pts.length - 1];
-        if (pts.length > 1 && Math.abs(first.a[0] - last.a[0]) < 0.001 && Math.abs(first.a[1] - last.a[1]) < 0.001) {
-          first.c1 = last.c1; first.c2 = last.c2; pts.pop();
-        }
-        // handles: this.left = c2, prev.right = c1
-        for (m = 0; m < pts.length; m++) {
-          if (pts[m].c1) {
-            var prev = pts[(m - 1 + pts.length) % pts.length];
-            prev.r = pts[m].c1; pts[m].l = pts[m].c2;
-          }
-        }
-        var path = cp.pathItems.add();
-        for (m = 0; m < pts.length; m++) {
-          var pp = path.pathPoints.add();
-          pp.anchor = pts[m].a;
-          pp.leftDirection = pts[m].l || pts[m].a;
-          pp.rightDirection = pts[m].r || pts[m].a;
-          pp.pointType = PointType.CORNER;
-        }
-        path.closed = true;
-      }
-      for (j = 0; j < cp.pathItems.length; j++) paint(cp.pathItems[j]);
+      (function (it) {
+        var k = it.size / C.at.upm, ox = X(0, it.x), oy = Y(0, it.top);
+        drawContours(K, C.at.contours, function (gx, gy) { return [ox + gx * k, oy + gy * k]; }, '@', ink);
+      })(it);
     } else if (it.kind === 'diamond') {
       var d = K.pathItems.add();
       d.setEntirePath([[X(0, it.cx), Y(0, it.cy - it.h)], [X(0, it.cx + it.h), Y(0, it.cy)], [X(0, it.cx), Y(0, it.cy + it.h)], [X(0, it.cx - it.h), Y(0, it.cy)]]);
@@ -250,16 +252,21 @@ const TEMPLATE = `#target illustrator
     }
   }
 
-  // 6b) print spec note on layer 'spec', outside the artboards (below the back side) - never printed
-  var specLines = C.spec.join('\\r');
-  var sp = L[5].textFrames.pointText([AB[1].left, AB[1].top - C.trim.h - 40]);
-  sp.contents = specLines;
-  sp.name = 'print spec';
-  var sa = sp.textRange.characterAttributes;
-  sa.textFont = F.hangul; sa.size = 9; sa.autoLeading = false; sa.leading = 13;
-  var black = new CMYKColor(); black.cyan = 0; black.magenta = 0; black.yellow = 0; black.black = 100;
-  sa.fillColor = black;
-  try { sp.paragraphs[0].characterAttributes.size = 12; } catch (e) {}
+  // 6b) print spec note on layer 'spec': above the info side, white box + Pretendard outlines (outside artboards, never printed)
+  (function () {
+    var S = C.spec, pad = 20, gap = 40;
+    var w = Math.max(C.trim.w, S.width + pad * 2), h = S.height + pad * 2;
+    var left = AB[0].left - C.bleed, bottom = AB[0].top + C.bleed + gap, top = bottom + h;
+    var white = new CMYKColor(); white.cyan = 0; white.magenta = 0; white.yellow = 0; white.black = 0;
+    var black = new CMYKColor(); black.cyan = 0; black.magenta = 0; black.yellow = 0; black.black = 100;
+    var bg = L[5].pathItems.rectangle(top, left, w, h);
+    bg.filled = true; bg.stroked = false; bg.fillColor = white; bg.name = 'print spec background';
+    var grp = L[5].groupItems.add(); grp.name = 'print spec';
+    var ox = left + pad, oy = top - pad;
+    for (var n = 0; n < S.lines.length; n++) {
+      drawContours(grp, S.lines[n].contours, function (x, y) { return [ox + x, oy - y]; }, S.lines[n].text, black);
+    }
+  })();
 
   // 7) save next to this script
   var dest = new File(File($.fileName).parent + '/' + C.fileName);

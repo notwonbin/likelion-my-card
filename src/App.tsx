@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Header } from './components/Header'
 import type { Step } from './components/StepIndicator'
 import { InformationForm } from './components/InformationForm'
@@ -20,6 +20,15 @@ export default function App() {
   const [sub, setSub] = useState(0)
   /** 시작 화면에서 고른 명함 신청 사유 (null = 시작 화면) — 추후 제작 신청 기록에 사용 */
   const [reason, setReason] = useState<Reason | null>(null)
+
+  // 파일 만들기 기능과 필요한 파일을 미리 받아 둔다 — 입력 중에 새 버전이 배포돼도 완료 화면에서 그대로 동작
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      import('./print/generatePdf').then((m) => m.warmUpPdf()).catch(() => {})
+      import('./print/illustratorScript').then((m) => m.warmUpIllustrator()).catch(() => {})
+    }, 1500)
+    return () => window.clearTimeout(t)
+  }, [])
   /** 모바일 시작 화면: 커버(사자·문구) → 이유 선택 순서로 한 장씩 */
   const [coverDone, setCoverDone] = useState(false)
   const [data, setData] = useState<CardData>(EMPTY_DATA)

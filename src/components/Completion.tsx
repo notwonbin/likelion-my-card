@@ -31,7 +31,13 @@ export function Completion({ data, onEdit, onRestart, className }: Props) {
     } catch (e) {
       console.error(e)
       const msg = e instanceof Error ? e.message : String(e)
-      setNote(/^(서체에|영문 서체)/.test(msg) ? msg : `파일을 만들지 못했어요. (${msg})`)
+      setNote(
+        /^(서체에|영문 서체)/.test(msg)
+          ? msg
+          : /dynamically imported module|Importing a module script failed|파일을 불러오지 못했어요/.test(msg)
+            ? '사이트가 새 버전으로 바뀌었어요. 새로고침한 뒤 다시 받아 주세요.'
+            : `파일을 만들지 못했어요. (${msg})`,
+      )
     } finally {
       setBusy(null)
     }

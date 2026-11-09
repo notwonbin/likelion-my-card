@@ -2,7 +2,7 @@
  * 일러스트레이터용 스크립트(.jsx) 생성 — 원본 .ai와 같은 레이어 구조의 새 문서를 만든다.
  *
  * 실행: Illustrator › 파일 › 스크립트 › 기타 스크립트… 에서 받은 .jsx 선택
- * 결과: 스크립트와 같은 폴더에 '명함_이름_날짜.ai'
+ * 결과: 스크립트와 같은 폴더에 '명함_이름_날짜.ai'(글자 수정 가능) + '명함_이름_날짜_outline.ai'(글자 아웃라인, 인쇄소용)
  *   - 아트보드 2개: 1 정보 면, 2 그래픽 면 (재단 90×50mm, 도련 3mm)
  *   - 레이어 (위→아래): spec · 실크 · orange_021c · k · orange_021c · yellow_127c  (원본과 같음)
  *   - 그래픽: 원본 PDF에서 레이어별로 분리한 벡터를 각 레이어에 포함 (CMYK 값 그대로)
@@ -37,6 +37,9 @@ const ART: { board: 0 | 1; layer: number; url: string }[] = [
   { board: 1, layer: 3, url: backOrangeTop },
   { board: 1, layer: 4, url: backSilk },
 ]
+
+/** 페이지를 연 직후 레이어별 그래픽을 미리 받아 두기 */
+export const warmUpIllustrator = () => Promise.all(ART.map((a) => mustFetch(a.url)))
 
 const b64 = (buf: ArrayBuffer) => {
   let s = ''
@@ -250,8 +253,12 @@ const TEMPLATE = `#target illustrator
   var opt = new IllustratorSaveOptions();
   opt.pdfCompatible = true;
   doc.saveAs(dest, opt);
+  // outlined copy for print (no fonts needed at the print shop): *_outline.ai
+  for (i = K.textFrames.length - 1; i >= 0; i--) K.textFrames[i].createOutline();
+  var destO = new File(String(dest).replace(/\\.ai$/, '_outline.ai'));
+  doc.saveAs(destO, opt);
   for (i = 0; i < files.length; i++) files[i].remove();
   tmp.remove();
-  alert('\\uC644\\uB8CC\\n' + decodeURI(dest.fsName));
+  alert('\\uC644\\uB8CC\\n' + decodeURI(dest.fsName) + '\\n' + decodeURI(destO.fsName));
 })();
 `

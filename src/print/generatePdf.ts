@@ -52,11 +52,23 @@ async function fetchFont(url: string): Promise<ArrayBuffer | null> {
   }
 }
 
-export async function mustFetch(url: string) {
-  const r = await fetch(url)
-  if (!r.ok) throw new Error(`파일을 불러오지 못했어요: ${url}`)
-  return r.arrayBuffer()
+/** 한 번 받은 파일은 기억해 둔다 — 페이지를 연 뒤 새 버전이 배포돼도(이전 파일이 사라져도) 그대로 쓸 수 있게 */
+const cache = new Map<string, Promise<ArrayBuffer>>()
+export function mustFetch(url: string): Promise<ArrayBuffer> {
+  let p = cache.get(url)
+  if (!p) {
+    p = fetch(url).then((r) => {
+      if (!r.ok) throw new Error(`파일을 불러오지 못했어요: ${url}`)
+      return r.arrayBuffer()
+    })
+    p.catch(() => cache.delete(url))
+    cache.set(url, p)
+  }
+  return p.then((b) => b.slice(0))
 }
+
+/** 페이지를 연 직후 미리 받아 두기 (템플릿·한글 서체·대체 서체) */
+export const warmUpPdf = () => Promise.all([frontUrl, backUrl, silkUrl, suiteUrl, fallbackUrl].map(mustFetch))
 
 /**
  * 이 컴퓨터에 설치된 Gotham Bold 읽기 (Chrome·Edge의 로컬 글꼴 접근, 사용자 허용 필요)

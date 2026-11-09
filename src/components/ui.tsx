@@ -6,6 +6,7 @@ export const STEP_CARD_HEIGHT = 'lg:h-[530px]'
 /** 단계 카드: 상단 서비스명 + 진행 알약, 큰 질문 제목, 본문, 하단 고정 버튼 영역 */
 export function StepCard({
   badge,
+  mobileBadge,
   title,
   description,
   aside,
@@ -16,6 +17,8 @@ export function StepCard({
 }: {
   /** 진행 표시 (예: 1 of 3) — 없으면 표시하지 않는다 */
   badge?: string
+  /** 모바일에서만 보이는 진행 표시 (데스크톱은 오른쪽 명함 카드에 표시) */
+  mobileBadge?: string
   title: ReactNode
   description?: ReactNode
   aside?: ReactNode
@@ -26,12 +29,15 @@ export function StepCard({
   showLabel?: boolean
 }) {
   return (
-    <section className={`flex flex-col rounded-[20px] bg-white p-6 sm:p-8 ${className}`}>
+    <section className={`flex flex-col rounded-[20px] bg-white p-6 max-lg:flex-1 sm:p-8 ${className}`}>
       <div className="flex min-h-[26px] items-center justify-between gap-2">
         {showLabel ? <span className="text-[13px] font-semibold text-mute">멋쟁이사자처럼 명함 만들기</span> : <span />}
         <div className="flex items-center gap-2">
           {aside}
           {badge && <span className="rounded-full bg-fill px-2.5 py-1 text-[11.5px] font-bold tabular-nums text-ink/70">{badge}</span>}
+          {!badge && mobileBadge && (
+            <span className="rounded-full bg-fill px-2.5 py-1 text-[11.5px] font-bold tabular-nums text-ink/70 lg:hidden">{mobileBadge}</span>
+          )}
         </div>
       </div>
       <h1 className="mt-5 text-[24px] font-bold leading-[1.35] tracking-[-0.025em] sm:text-[26px]">{title}</h1>

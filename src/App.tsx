@@ -20,6 +20,8 @@ export default function App() {
   const [sub, setSub] = useState(0)
   /** 시작 화면에서 고른 명함 신청 사유 (null = 시작 화면) — 추후 제작 신청 기록에 사용 */
   const [reason, setReason] = useState<Reason | null>(null)
+  /** 모바일 시작 화면: 커버(사자·문구) → 이유 선택 순서로 한 장씩 */
+  const [coverDone, setCoverDone] = useState(false)
   const [data, setData] = useState<CardData>(EMPTY_DATA)
   const [org, setOrg] = useState<OrgSelection>(EMPTY_ORG)
   const [overflowRaw, setOverflowRaw] = useState<OverflowMap>({})
@@ -111,11 +113,12 @@ export default function App() {
     <div className="flex min-h-dvh flex-col">
       <Header step={step} />
       {/* 단계 카드는 화면 세로 가운데 */}
-      <div className="flex flex-1 flex-col justify-center pb-10 lg:pb-16">
+      <div className="flex flex-1 flex-col pb-4 lg:justify-center lg:pb-16">
         {/* 모든 단계가 같은 틀: 왼쪽 카드(입력·확인·완료) + 오른쪽 카드(명함) — 크기·위치가 바뀌지 않는다 */}
-        <main className="mx-auto grid w-full max-w-[1120px] grid-cols-[minmax(0,1fr)] gap-4 px-4 pt-2 sm:px-6 lg:grid-cols-[440px_minmax(0,1fr)] lg:gap-5 lg:pt-0">
-          <div className={intro ? 'order-1' : 'order-2 lg:order-1'}>
-            {intro && <IntroCover />}
+        <main className="mx-auto grid w-full max-w-[1120px] grid-cols-[minmax(0,1fr)] gap-4 px-4 pt-2 max-lg:flex-1 max-lg:grid-rows-[minmax(0,1fr)] sm:px-6 lg:grid-cols-[440px_minmax(0,1fr)] lg:gap-5 lg:pt-0">
+          {/* 모바일: 카드 하나만 (시작 화면은 이유 선택, 이후는 입력·확인·완료). 명함 미리보기는 화면 밖에서 넘침 계산만 */}
+          <div className={intro ? (coverDone ? 'max-lg:hidden' : 'flex flex-col') : 'flex flex-col'}>
+            {intro && <IntroCover onStart={() => setCoverDone(true)} />}
             {step === 1 && !intro && (
               <InformationForm
                 key={formKey}
@@ -135,6 +138,7 @@ export default function App() {
             )}
             {step === 2 && (
               <Confirmation
+                data={data}
                 className={STEP_CARD_HEIGHT}
                 ok={Object.keys(errors).length === 0 && !hasOverflow}
                 onBack={() => go(1)}
@@ -152,12 +156,13 @@ export default function App() {
                   setData(EMPTY_DATA)
                   setFormKey((k) => k + 1)
                   setReason(null)
+                  setCoverDone(false)
                   go(1, 0)
                 }}
               />
             )}
           </div>
-          <div className={intro ? 'order-2' : 'order-1 lg:order-2'}>
+          <div className={intro ? (coverDone ? 'flex flex-col' : 'max-lg:hidden') : 'max-lg:invisible max-lg:fixed max-lg:top-0 max-lg:-left-[10000px] max-lg:w-[480px]'}>
             {intro ? (
               <ReasonCard
                 badge="1 of 5"

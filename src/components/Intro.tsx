@@ -28,12 +28,16 @@ function usePrefersReducedMotion() {
  * 모션은 정방향→역방향으로 이어 붙인 영상을 반복 재생해 끊김 없이 순환한다.
  * 영상의 검정 배경은 mix-blend-mode: lighten 으로 카드 배경(#231F20)에 녹인다.
  */
-export function IntroCover() {
+/** onStart: 모바일에서 카드를 누르면 이유 선택으로 (데스크톱은 오른쪽 카드에서 바로 고르므로 무시) */
+export function IntroCover({ onStart }: { onStart?: () => void }) {
   const reduced = usePrefersReducedMotion()
   return (
     <section
       aria-label="멋쟁이사자처럼 명함 만들기"
-      className={`relative flex h-[460px] flex-col overflow-hidden rounded-[20px] bg-[#231f20] p-6 text-white sm:p-8 ${STEP_CARD_HEIGHT}`}
+      onClick={() => {
+        if (onStart && !window.matchMedia('(min-width: 1024px)').matches) onStart()
+      }}
+      className={`relative flex h-[460px] flex-col overflow-hidden max-lg:h-auto max-lg:flex-1 max-lg:cursor-pointer rounded-[20px] bg-[#231f20] p-6 text-white sm:p-8 ${STEP_CARD_HEIGHT}`}
     >
       {/* 배경: 위(문구)는 원본 명함의 검정 #231F20, 아래(사자)로 갈수록 더 깊은 검정 —
           영상은 lighten 으로 합성되므로 사자의 눈·코(원본 순수 검정)가 배경색으로 들뜨지 않게 한다.
@@ -49,7 +53,7 @@ export function IntroCover() {
       {/* 사자 모션 — 시선이 오른쪽이라 왼쪽에 두고 오른쪽 여백 확보, 다리 쪽은 카드 아래에서 트리밍 */}
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-0 left-[9%] aspect-[2/3] w-[66%] translate-y-[22%] mix-blend-lighten"
+        className="pointer-events-none absolute bottom-0 left-[9%] aspect-[2/3] w-[66%] translate-y-[22%] mix-blend-lighten max-lg:left-[10%] max-lg:w-[min(80%,46dvh)] max-lg:translate-y-[16%]"
       >
         {reduced ? (
           <img src={lionLast} alt="" className="h-full w-full object-contain" />

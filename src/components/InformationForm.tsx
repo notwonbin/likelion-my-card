@@ -82,10 +82,11 @@ export function InformationForm({ sub, onSub, data, errors, overflow, limitHit, 
         e.preventDefault()
         next()
       }}
-      className="h-full"
+      className="flex h-full flex-col max-lg:flex-1"
     >
       <StepCard
         className={STEP_CARD_HEIGHT}
+        mobileBadge={`${sub + 2} of 5`}
         title={step.title}
         description={step.description || undefined}
         footer={

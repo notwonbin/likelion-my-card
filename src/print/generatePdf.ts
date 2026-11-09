@@ -17,7 +17,7 @@ import backUrl from '../../print-templates/back.pdf?url'
 import silkUrl from '../../print-templates/back-silk.pdf?url'
 import suiteUrl from '../assets/pdf-fonts/SUITE-Heavy.otf?url'
 import fallbackUrl from '../assets/pdf-fonts/Montserrat-Bold-fallback.ttf?url'
-import { ARTBOARD, COLORS } from '../card/spec'
+import { ARTBOARD, COLORS, PRINT_SPEC } from '../card/spec'
 import { AT_GLYPH, toCardText } from '../card/typeset'
 import type { CardData } from '../card/types'
 import { atContours, computeLayout, type FKFont, type FontKey } from './layout'
@@ -220,6 +220,7 @@ export async function generatePrintPdf(data: CardData): Promise<PrintPdfResult> 
   const { who, name } = cardFileName(data, 'pdf', printReady ? '' : '_검수용')
   doc.setTitle(`LIKELION 명함 — ${who}${printReady ? '' : ' (검수용: 대체 서체)'}`)
   doc.setSubject('1쪽 정보 면 / 2쪽 그래픽 면 / 3쪽 실크 후가공 판 · 90×50mm, 도련 3mm')
+  doc.setKeywords(PRINT_SPEC.sections.map((s) => `${s.label} ${s.lines.join(', ')}`))
   doc.setCreator('LIKELION My Card')
   doc.setProducer('LIKELION My Card (pdf-lib)')
   const bytes = await doc.save({ useObjectStreams: false })

@@ -6,6 +6,7 @@
  *   - 아트보드 2개: 1 정보 면, 2 그래픽 면 (재단 90×50mm, 도련 3mm)
  *   - 레이어 (위→아래): spec · 실크 · orange_021c · k · orange_021c · yellow_127c  (원본과 같음)
  *   - 그래픽: 원본 PDF에서 레이어별로 분리한 벡터를 각 레이어에 포함 (CMYK 값 그대로)
+ *   - spec 레이어: 원본의 제작 사양 메모(지류·후가공·도수)를 아트보드 밖(그래픽 면 아래)에 텍스트로
  *   - 개인 정보·주소: k 레이어에 살아 있는 텍스트 (Gotham Bold / SUITE Heavy, K98, 원본 자간)
  *     '@'는 원본 글리프 외곽선, 주소 구분 기호는 원본 마름모
  * 그래픽 데이터는 스크립트 안에 들어 있어 따로 받을 파일이 없다.
@@ -19,7 +20,7 @@ import backOrangeLow from '../../print-templates/layers/back_orange_low.pdf?url'
 import backK from '../../print-templates/layers/back_k.pdf?url'
 import backOrangeTop from '../../print-templates/layers/back_orange_top.pdf?url'
 import backSilk from '../../print-templates/layers/back_silk.pdf?url'
-import { ARTBOARD, COLORS, FONTS } from '../card/spec'
+import { ARTBOARD, COLORS, FONTS, PRINT_SPEC } from '../card/spec'
 import { AT_GLYPH } from '../card/typeset'
 import type { CardData } from '../card/types'
 import { cardFileName, loadCardFonts, mustFetch } from './generatePdf'
@@ -75,6 +76,7 @@ export async function generateIllustratorScript(data: CardData) {
       k: COLORS.textK98.cmyk,
       at: { upm: AT_GLYPH.unitsPerEm, contours, advance: AT_GLYPH.advance / AT_GLYPH.unitsPerEm },
       items,
+      spec: [PRINT_SPEC.title, ''].concat(PRINT_SPEC.sections.flatMap((sec) => [sec.label, ...sec.lines, ''])).slice(0, -1),
     }),
   ).replace('__ART__', () => lit(art))
   return { script, fileName: fileName.replace(/\.ai$/, '.jsx') }
@@ -247,6 +249,17 @@ const TEMPLATE = `#target illustrator
       paint(d);
     }
   }
+
+  // 6b) print spec note on layer 'spec', outside the artboards (below the back side) - never printed
+  var specLines = C.spec.join('\\r');
+  var sp = L[5].textFrames.pointText([AB[1].left, AB[1].top - C.trim.h - 40]);
+  sp.contents = specLines;
+  sp.name = 'print spec';
+  var sa = sp.textRange.characterAttributes;
+  sa.textFont = F.hangul; sa.size = 9; sa.autoLeading = false; sa.leading = 13;
+  var black = new CMYKColor(); black.cyan = 0; black.magenta = 0; black.yellow = 0; black.black = 100;
+  sa.fillColor = black;
+  try { sp.paragraphs[0].characterAttributes.size = 12; } catch (e) {}
 
   // 7) save next to this script
   var dest = new File(File($.fileName).parent + '/' + C.fileName);

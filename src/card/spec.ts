@@ -31,7 +31,7 @@ export const COLORS = {
 
 /** 원본 레이어 (Illustrator 레이어 순서: 위 → 아래) */
 export const LAYERS = [
-  { name: 'spec', role: '제작 사양 메모용 (현재 비어 있음)', kind: 'guide' },
+  { name: 'spec', role: '제작 사양 메모 (아트보드 밖, PRINT_SPEC)', kind: 'guide' },
   { name: '실크', role: '후가공(실크) 판 — 뒷면 L자 프레임 + 주황 강조 문구 영역', kind: 'finish' },
   { name: 'orange_021c', role: '뒷면 강조 문구(<POSSIBILITY> 등)', kind: 'print' },
   { name: 'k', role: '검정 판 — 뒷면 박스·문구·심볼, 앞면 로고·주소·개인정보 텍스트', kind: 'print' },
@@ -103,3 +103,16 @@ export const FRONT_LAYOUT = {
 } as const
 
 export const EMAIL_DOMAIN = 'likelion.net'
+
+/**
+ * 원본 'spec' 레이어의 제작 사양 메모 (아트보드 밖에 있어 PDF 호환 데이터에는 없음 — 원본 화면 기준 그대로 옮김)
+ * 'Orangr'은 원본 표기 그대로 둔다.
+ */
+export const PRINT_SPEC = {
+  title: '<Print spec>',
+  sections: [
+    { label: '[지류]', lines: ['아르떼 310g'] },
+    { label: '[후가공]', lines: ['전면 M 100% 실크 코팅', '측면 에칭 (Pantone Orangr 021c)'] },
+    { label: '[도수]', lines: ['별색 2도(Pantone Orangr 021c, Pantone 127c) + 먹 1도'] },
+  ],
+} as const

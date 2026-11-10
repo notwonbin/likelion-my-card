@@ -106,13 +106,13 @@ export const EMAIL_DOMAIN = 'likelion.net'
 
 /**
  * 원본 'spec' 레이어의 제작 사양 메모 (아트보드 밖에 있어 PDF 호환 데이터에는 없음 — 원본 화면 기준 그대로 옮김)
- * 'Orangr'은 원본 표기 그대로 둔다.
+ * 원본 메모의 'Orangr' 오타는 'Orange'로 바로잡음 (PANTONE Orange 021 C).
  */
 export const PRINT_SPEC = {
   title: '<Print spec>',
   sections: [
     { label: '[지류]', lines: ['아르떼 310g'] },
-    { label: '[후가공]', lines: ['전면 M 100% 실크 코팅', '측면 에칭 (Pantone Orangr 021c)'] },
-    { label: '[도수]', lines: ['별색 2도(Pantone Orangr 021c, Pantone 127c) + 먹 1도'] },
+    { label: '[후가공]', lines: ['전면 M 100% 실크 코팅', '측면 에칭 (Pantone Orange 021c)'] },
+    { label: '[도수]', lines: ['별색 2도(Pantone Orange 021c, Pantone 127c) + 먹 1도'] },
   ],
 } as const

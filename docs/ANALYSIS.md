@@ -92,7 +92,7 @@
 
 ## 변경 이력
 
-- 2026-11-09 `spec` 레이어 보완: 분석 당시 '비어 있음'으로 기록했으나, 원본에는 아트보드 밖에 제작 사양 메모가 있다(Illustrator 전용 데이터라 PDF 호환 내용에는 없어 놓쳤음). 사용자 화면 기준으로 옮김 — 지류 아르떼 310g / 후가공 전면 M 100% 실크 코팅, 측면 에칭(Pantone Orange 021c) / 도수 별색 2도(Pantone Orange 021c, Pantone 127c) + 먹 1도. `spec.ts`의 `PRINT_SPEC`, 일러 파일의 spec 레이어, PDF 문서 정보(키워드)에 반영.
+- 2026-11-09 `spec` 레이어 보완: 분석 당시 '비어 있음'으로 기록했으나, 원본에는 아트보드 밖에 제작 사양 메모가 있다(Illustrator 전용 데이터라 PDF 호환 내용에는 없어 놓쳤음). 사용자 화면 기준으로 옮김 — 지류 아르떼 310g / 후가공 전면 M 100% 실크 코팅, 측면 에칭(Pantone Orange 021c) / 도수 별색 2도(Pantone Orange 021c, Pantone 127c) + 먹 1도. `spec.ts`의 `PRINT_SPEC`, 일러 파일의 spec 레이어, PDF 문서 정보(키워드)에 반영. 원본 메모의 'Orangr' 오타는 'Orange'로 바로잡음(팬톤 공식 이름 PANTONE Orange 021 C).
 
 - 2026-11-09 인쇄용 PDF 생성 추가. 이전 `print-templates/back.pdf`에는 `실크` 레이어(M100 표시색)가 그래픽 위에 함께 들어 있어 그대로 인쇄하면 마젠타가 찍히는 문제가 있었다 → `back.pdf`에서 실크를 빼고 `back-silk.pdf`로 분리. 생성 PDF 1쪽을 화면 미리보기와 겹쳐 위치 일치 확인.
 

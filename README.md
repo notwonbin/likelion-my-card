@@ -17,6 +17,12 @@ npm run dev          # http://localhost:5173
 
 Gotham은 상용 서체라 번들하지 않는다. **PC에 Gotham Bold가 설치되어 있으면 자동으로 사용**하고, 없으면 화면 확인용 대체 서체(Montserrat Bold)로 표시하며 미리보기 하단에 그 사실을 안내한다. 대체 서체는 폭이 달라 안전영역 초과 판정도 근사치가 된다.
 
+## 명함 신청 (구글 드라이브 자동 저장)
+
+배포 환경변수 `VITE_SUBMIT_URL`(Google Apps Script 웹 앱 주소)이 있으면 확인 단계 버튼이 **신청할게요**가 된다.
+누르면 일러 파일(.jsx)·확인용 PDF가 드라이브 폴더에 저장되고, 구글 시트에 기록되고, 담당자·신청자에게 메일이 간다.
+없으면(로컬·`dist-single`) 예전처럼 완료 화면에서 파일을 직접 받는다. 설정 방법: `docs/SUBMIT_SETUP.md`
+
 ## 인쇄용 PDF
 
 완료 화면의 **인쇄용 PDF 받기** → `src/print/generatePdf.ts` (브라우저에서 생성, 서버 없음).
